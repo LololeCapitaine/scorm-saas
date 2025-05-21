@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tableau de bord</title>
+</head>
+<body>
+  <h2>📂 Vos modules SCORM</h2>
+
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <label>Uploader un fichier SCORM (.zip) :</label><br>
+    <input type="file" name="scormfile" accept=".zip" required>
+    <button type="submit">Envoyer</button>
+  </form>
+
+  <hr>
+
+  <div id="list"></div>
+
+  <script>
+    fetch('/list')
+      .then(res => res.json())
+      .then(modules => {
+        const listDiv = document.getElementById('list');
+        if (modules.length === 0) {
+          listDiv.innerHTML = "<p>Vous n'avez encore aucun module.</p>";
+          return;
+        }
+
+        const table = document.createElement('table');
+        table.border = 1;
+        table.innerHTML = "<tr><th>Nom</th><th>Lien</th><th>Supprimer</th></tr>";
+
+        modules.forEach(mod => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${mod.name}</td>
+            <td><a href="${mod.url}" target="_blank">🔗 Voir</a></td>
+            <td>
+              <form action="/delete" method="post" onsubmit="return confirm('Supprimer ce module ?');">
+                <input type="hidden" name="module" value="${mod.folder}">
+                <button type="submit">❌</button>
+              </form>
+            </td>
+          `;
+          table.appendChild(row);
+        });
+
+        listDiv.appendChild(table);
+      });
+  </script>
+
+  <hr>
+  <a href="/logout">🔓 Se déconnecter</a>
+</body>
+</html>
+
