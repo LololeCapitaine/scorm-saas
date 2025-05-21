@@ -1,57 +1,71 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tableau de bord</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h2>📂 Vos modules SCORM</h2>
+<body class="bg-gray-100 text-gray-800">
 
-  <form action="/upload" method="post" enctype="multipart/form-data">
-    <label>Uploader un fichier SCORM (.zip) :</label><br>
-    <input type="file" name="scormfile" accept=".zip" required>
-    <button type="submit">Envoyer</button>
-  </form>
+  <div class="max-w-4xl mx-auto mt-10 px-4">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">📂 Vos modules SCORM</h1>
+      <a href="/logout" class="text-sm text-red-600 hover:underline">🔓 Déconnexion</a>
+    </div>
 
-  <hr>
+    <!-- Upload form -->
+    <form action="/upload" method="post" enctype="multipart/form-data" class="bg-white p-4 rounded shadow mb-6 space-y-4">
+      <label class="block font-medium">Uploader un fichier SCORM (.zip)</label>
+      <input type="file" name="scormfile" accept=".zip" required class="border rounded p-2 w-full">
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Envoyer</button>
+    </form>
 
-  <div id="list"></div>
+    <!-- Liste des modules -->
+    <div id="list" class="bg-white p-4 rounded shadow"></div>
+  </div>
 
   <script>
     fetch('/list')
       .then(res => res.json())
       .then(modules => {
-        const listDiv = document.getElementById('list');
+        const container = document.getElementById('list');
         if (modules.length === 0) {
-          listDiv.innerHTML = "<p>Vous n'avez encore aucun module.</p>";
+          container.innerHTML = "<p class='text-gray-600'>Vous n'avez encore aucun module.</p>";
           return;
         }
 
         const table = document.createElement('table');
-        table.border = 1;
-        table.innerHTML = "<tr><th>Nom</th><th>Lien</th><th>Supprimer</th></tr>";
+        table.className = "w-full table-auto border-collapse";
 
-        modules.forEach(mod => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${mod.name}</td>
-            <td><a href="${mod.url}" target="_blank">🔗 Voir</a></td>
-            <td>
-              <form action="/delete" method="post" onsubmit="return confirm('Supprimer ce module ?');">
-                <input type="hidden" name="module" value="${mod.folder}">
-                <button type="submit">❌</button>
-              </form>
-            </td>
-          `;
-          table.appendChild(row);
-        });
+        table.innerHTML = `
+          <thead>
+            <tr class="bg-gray-200 text-left text-sm">
+              <th class="p-2 border-b">Nom</th>
+              <th class="p-2 border-b">Lien</th>
+              <th class="p-2 border-b">Supprimer</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${modules.map(mod => `
+              <tr class="hover:bg-gray-50">
+                <td class="p-2 border-b">${mod.name}</td>
+                <td class="p-2 border-b">
+                  <a href="${mod.url}" target="_blank" class="text-blue-600 hover:underline">🔗 Voir</a>
+                </td>
+                <td class="p-2 border-b">
+                  <form action="/delete" method="post" onsubmit="return confirm('Supprimer ce module ?');">
+                    <input type="hidden" name="module" value="${mod.folder}">
+                    <button type="submit" class="text-red-600 hover:underline">❌</button>
+                  </form>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        `;
 
-        listDiv.appendChild(table);
+        container.appendChild(table);
       });
   </script>
-
-  <hr>
-  <a href="/logout">🔓 Se déconnecter</a>
 </body>
 </html>
-

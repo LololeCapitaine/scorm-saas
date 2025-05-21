@@ -2,14 +2,32 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Connexion</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h2>Connexion</h2>
-  <form action="/login" method="post">
-    Email : <input type="email" name="email" required><br>
-    Mot de passe : <input type="password" name="password" required><br>
-    <button type="submit">Se connecter</button>
-  </form>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+  <div class="bg-white shadow-md rounded p-6 w-full max-w-md">
+    <h2 class="text-2xl font-semibold mb-4 text-center">🔐 Connexion</h2>
+    <form action="/login" method="post" class="space-y-4">
+      <div>
+        <label class="block mb-1">Email</label>
+        <input type="email" name="email" required class="w-full border p-2 rounded">
+      </div>
+      <div>
+        <label class="block mb-1">Mot de passe</label>
+        <input type="password" name="password" required class="w-full border p-2 rounded">
+      </div>
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">
+        Se connecter
+      </button>
+    </form>
+    <p class="text-sm text-center mt-4">
+      Pas encore de compte ?
+      <a href="/register" class="text-blue-600 hover:underline">Créer un compte</a>
+    </p>
+  </div>
+
 </body>
 </html>
