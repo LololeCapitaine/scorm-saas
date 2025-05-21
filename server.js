@@ -61,7 +61,9 @@ const initDB = async () => {
 initDB();
 
 // 🔐 Auth
-app.get('/', (req, res) => res.redirect('/login'));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 app.get('/register', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
 app.get('/dashboard', (req, res) => {

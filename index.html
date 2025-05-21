@@ -1,17 +1,25 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Uploader un fichier SCORM</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OneClickScorm - Accueil</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen">
 
-    <h2>📁 Uploader ton fichier SCORM (.zip)</h2>
-
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="scormfile" accept=".zip" required>
-        <button type="submit">Envoyer le fichier</button>
-    </form>
+  <div class="text-center max-w-xl p-6">
+    <h1 class="text-4xl font-bold text-blue-700 mb-4">OneClickScorm</h1>
+    <p class="text-lg mb-8 text-gray-700">Héberger un module SCORM n’a jamais été aussi simple.</p>
+    <div class="flex justify-center gap-4">
+      <a href="/login" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded text-lg">
+        Se connecter
+      </a>
+      <a href="/register" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded text-lg">
+        Créer un compte
+      </a>
+    </div>
+  </div>
 
 </body>
 </html>
