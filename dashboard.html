@@ -14,12 +14,23 @@
       <a href="/logout" class="text-sm text-red-600 hover:underline">🔓 Déconnexion</a>
     </div>
 
-    <!-- Formulaire upload AJAX -->
-    <form id="uploadForm" enctype="multipart/form-data" class="bg-white p-4 rounded shadow mb-6 space-y-4">
-      <label class="block font-medium">Uploader un fichier SCORM (.zip)</label>
-      <input type="file" name="scormfile" accept=".zip" required class="border rounded p-2 w-full">
-      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Envoyer</button>
-    </form>
+ <!-- Formulaire upload AJAX -->
+<form id="uploadForm" enctype="multipart/form-data" class="bg-white p-4 rounded shadow mb-6 space-y-4">
+  <label class="block font-medium">Uploader un fichier SCORM (.zip)</label>
+  <input type="file" name="scormfile" accept=".zip" required class="border rounded p-2 w-full">
+  <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Envoyer</button>
+
+  <!-- Loader masqué par défaut -->
+  <div id="loader" class="flex items-center gap-2 text-blue-600 mt-4 hidden">
+    <svg class="animate-spin h-5 w-5 text-blue-600" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+      <path class="opacity-75" fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+    </svg>
+    <span>Chargement du module…</span>
+  </div>
+</form>
+
 
     <!-- Liste des modules -->
     <div id="list" class="bg-white p-4 rounded shadow"></div>
@@ -34,86 +45,89 @@
     </div>
   </div>
 
-  <script>
-    // Chargement des modules
-    fetch('/list')
-      .then(res => res.json())
-      .then(modules => {
-        const container = document.getElementById('list');
-        if (modules.length === 0) {
-          container.innerHTML = "<p class='text-gray-600'>Vous n'avez encore aucun module.</p>";
-          return;
-        }
-
-        const table = document.createElement('table');
-        table.className = "w-full table-auto border-collapse";
-
-        table.innerHTML = `
-          <thead>
-            <tr class="bg-gray-200 text-left text-sm">
-              <th class="p-2 border-b">Nom</th>
-              <th class="p-2 border-b">Lien</th>
-              <th class="p-2 border-b">Supprimer</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${modules.map(mod => `
-              <tr class="hover:bg-gray-50">
-                <td class="p-2 border-b">${mod.name}</td>
-                <td class="p-2 border-b">
-                  <a href="${mod.url}" target="_blank" class="text-blue-600 hover:underline">🔗 Voir</a>
-                </td>
-                <td class="p-2 border-b">
-                  <form action="/delete" method="post" onsubmit="return confirm('Supprimer ce module ?');">
-                    <input type="hidden" name="module" value="${mod.folder}">
-                    <button type="submit" class="text-red-600 hover:underline">❌</button>
-                  </form>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        `;
-
-        container.appendChild(table);
-      });
-
-    // Formulaire AJAX
-    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const form = e.target;
-      const formData = new FormData(form);
-
-      const response = await fetch('/upload', {
-        method: 'POST',
-        body: formData
-      });
-
-      const html = await response.text();
-
-      // Récupère l'URL depuis la réponse HTML
-      const urlMatch = html.match(/href="([^"]+)"/);
-      if (urlMatch && urlMatch[1]) {
-        const moduleUrl = urlMatch[1];
-        document.getElementById('moduleLinkContainer').innerHTML = `
-          <a href="${moduleUrl}" target="_blank" class="text-blue-600 underline text-lg">➡️ Lancer le module</a>
-        `;
-      } else {
-        document.getElementById('moduleLinkContainer').textContent = 'Fichier envoyé, mais lien non détecté.';
+ <script>
+  // Chargement des modules
+  fetch('/list')
+    .then(res => res.json())
+    .then(modules => {
+      const container = document.getElementById('list');
+      if (modules.length === 0) {
+        container.innerHTML = "<p class='text-gray-600'>Vous n'avez encore aucun module.</p>";
+        return;
       }
 
-      form.reset();
-      showModal();
+      const table = document.createElement('table');
+      table.className = "w-full table-auto border-collapse";
+
+      table.innerHTML = `
+        <thead>
+          <tr class="bg-gray-200 text-left text-sm">
+            <th class="p-2 border-b">Nom</th>
+            <th class="p-2 border-b">Lien</th>
+            <th class="p-2 border-b">Supprimer</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${modules.map(mod => `
+            <tr class="hover:bg-gray-50">
+              <td class="p-2 border-b">${mod.name}</td>
+              <td class="p-2 border-b">
+                <a href="${mod.url}" target="_blank" class="text-blue-600 hover:underline">🔗 Voir</a>
+              </td>
+              <td class="p-2 border-b">
+                <form action="/delete" method="post" onsubmit="return confirm('Supprimer ce module ?');">
+                  <input type="hidden" name="module" value="${mod.folder}">
+                  <button type="submit" class="text-red-600 hover:underline">❌</button>
+                </form>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      `;
+      container.appendChild(table);
     });
 
-    function showModal() {
-      document.getElementById('modal').classList.remove('hidden');
+  // Formulaire AJAX avec loader
+  document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const loader = document.getElementById('loader');
+
+    loader.classList.remove('hidden'); // affiche le loader
+
+    const response = await fetch('/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    loader.classList.add('hidden'); // cache le loader après réponse
+
+    const html = await response.text();
+    const urlMatch = html.match(/href="([^"]+)"/);
+    if (urlMatch && urlMatch[1]) {
+      const moduleUrl = urlMatch[1];
+      document.getElementById('moduleLinkContainer').innerHTML = `
+        <a href="${moduleUrl}" target="_blank" class="text-blue-600 underline text-lg">➡️ Lancer le module</a>
+      `;
+    } else {
+      document.getElementById('moduleLinkContainer').textContent = 'Fichier envoyé, mais lien non détecté.';
     }
 
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-      location.reload(); // recharge la page pour afficher le nouveau module
-    }
-  </script>
+    form.reset();
+    showModal();
+  });
+
+  function showModal() {
+    document.getElementById('modal').classList.remove('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.add('hidden');
+    location.reload(); // recharge la page pour afficher le nouveau module
+  }
+</script>
+
 </body>
 </html>
